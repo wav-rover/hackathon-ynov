@@ -5,9 +5,8 @@ import { authenticate } from "../middlewares/auth.middleware.js";
 
 export const userRouter = Router();
 
-userRouter.post("/", userController.create);
+// userRouter.post("/", userController.create);
 userRouter.use(authenticate);
-userRouter.get("/", userController.findMany);
 userRouter.get("/:id", userController.findById);
 userRouter.put("/:id", userController.update);
 userRouter.delete("/:id", userController.delete);

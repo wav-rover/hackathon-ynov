@@ -49,7 +49,12 @@ export const openApiDocument = {
         type: "object",
         properties: {
           username: { type: "string", example: "anton" },
-          password: { type: "string", example: "secret123" },
+          password: {
+            type: "string",
+            minLength: 8,
+            maxLength: 128,
+            example: "secret123",
+          },
         },
         required: ["username", "password"],
       },
@@ -102,7 +107,12 @@ export const openApiDocument = {
         type: "object",
         properties: {
           username: { type: "string", example: "anton_new" },
-          password: { type: "string", example: "new-secret123" },
+          password: {
+            type: "string",
+            minLength: 8,
+            maxLength: 128,
+            example: "new-secret123",
+          },
         },
       },
       ClinicIcon: {
@@ -292,6 +302,7 @@ export const openApiDocument = {
           },
           "400": { $ref: "#/components/responses/BadRequest" },
           "409": { $ref: "#/components/responses/Conflict" },
+          "429": { $ref: "#/components/responses/TooManyRequests" },
         },
       },
     },
@@ -318,6 +329,7 @@ export const openApiDocument = {
           },
           "400": { $ref: "#/components/responses/BadRequest" },
           "401": { $ref: "#/components/responses/Unauthorized" },
+          "429": { $ref: "#/components/responses/TooManyRequests" },
         },
       },
     },
@@ -332,51 +344,6 @@ export const openApiDocument = {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/User" },
-              },
-            },
-          },
-          "401": { $ref: "#/components/responses/Unauthorized" },
-        },
-      },
-    },
-    "/users": {
-      post: {
-        tags: ["Users"],
-        summary: "Create a user without returning a token",
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/AuthCredentials" },
-            },
-          },
-        },
-        responses: {
-          "201": {
-            description: "User created",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/User" },
-              },
-            },
-          },
-          "400": { $ref: "#/components/responses/BadRequest" },
-          "409": { $ref: "#/components/responses/Conflict" },
-        },
-      },
-      get: {
-        tags: ["Users"],
-        summary: "List users",
-        security: [{ bearerAuth: [] }],
-        responses: {
-          "200": {
-            description: "Users",
-            content: {
-              "application/json": {
-                schema: {
-                  type: "array",
-                  items: { $ref: "#/components/schemas/User" },
-                },
               },
             },
           },
@@ -676,6 +643,7 @@ export const openApiDocument = {
               },
             },
           },
+          "429": { $ref: "#/components/responses/TooManyRequests" },
         },
       },
     },
@@ -702,6 +670,8 @@ export const openApiDocument = {
               },
             },
           },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "429": { $ref: "#/components/responses/TooManyRequests" },
         },
       },
     },
@@ -753,6 +723,14 @@ Object.assign(openApiDocument.components, {
     },
     Conflict: {
       description: "Conflict",
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/Error" },
+        },
+      },
+    },
+    TooManyRequests: {
+      description: "Too many requests",
       content: {
         "application/json": {
           schema: { $ref: "#/components/schemas/Error" },

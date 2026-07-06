@@ -1,6 +1,6 @@
 import { HttpError } from "../errors/http-error.js";
 import { userRepository } from "../repositories/user.repository.js";
-import { hashPassword } from "../utils/password.js";
+import { assertValidPassword, hashPassword } from "../utils/password.js";
 import { requiredString } from "../utils/required-string.js";
 import { withoutPassword } from "../utils/without-password.js";
 
@@ -34,6 +34,7 @@ export const userService = {
     const password = requiredString(input.password, "password");
 
     await ensureUsernameIsAvailable(username);
+    assertValidPassword(password);
 
     const user = await userRepository.create({
       username,
@@ -41,12 +42,6 @@ export const userService = {
     });
 
     return withoutPassword(user);
-  },
-
-  async findMany() {
-    const users = await userRepository.findMany();
-
-    return users.map(withoutPassword);
   },
 
   async findById(id: number, currentUserId: number) {
@@ -80,6 +75,7 @@ export const userService = {
 
     if ("password" in input && input.password !== undefined) {
       const password = requiredString(input.password, "password");
+      assertValidPassword(password);
       data.password = await hashPassword(password);
     }
 

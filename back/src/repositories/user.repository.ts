@@ -11,13 +11,6 @@ type UpdateUserData = {
 };
 
 export const userRepository = {
-  findMany() {
-    return prisma.user.findMany({
-      include: { pets: true },
-      orderBy: { id: "asc" },
-    });
-  },
-
   findById(id: number) {
     return prisma.user.findUnique({
       where: { id },

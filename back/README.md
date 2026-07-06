@@ -178,6 +178,8 @@ Register/login body:
 }
 ```
 
+Passwords must be 8 to 128 characters long. Register and login endpoints are rate-limited.
+
 Protected routes require:
 
 ```http
@@ -187,14 +189,12 @@ Authorization: Bearer <jwt>
 ### Users
 
 ```http
-POST /users
-GET /users
 GET /users/:id
 PUT /users/:id
 DELETE /users/:id
 ```
 
-Users can read, update, and delete only their own user by id.
+Users can read, update, and delete only their own user by id. The API does not expose a user list endpoint.
 
 ### Pets
 
@@ -207,6 +207,7 @@ DELETE /pets/:id
 ```
 
 Pets belong to the authenticated user.
+`GET /pets` returns only pets owned by the current authenticated user.
 
 Create pet body:
 
@@ -230,6 +231,7 @@ The response combines:
 - local CSV results from `data/veterinary-clinics.csv`
 
 Duplicates are merged, then results are filtered, sorted, and paginated.
+Clinic search is rate-limited and Google Places results are cached briefly to protect API quota.
 
 Query params:
 

@@ -11,12 +11,6 @@ export const userController = {
     response.status(201).json(user);
   },
 
-  async findMany(_request: Request, response: Response) {
-    const users = await userService.findMany();
-
-    response.json(users);
-  },
-
   async findById(request: Request, response: Response) {
     const user = await userService.findById(
       parseId(request.params.id),

@@ -13,6 +13,12 @@ const DEFAULT_DISTANCE_KM = 5;
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 50;
+const GOOGLE_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const googleClinicCache = new Map<
+  string,
+  { expiresAt: number; clinics: VeterinaryClinic[] }
+>();
 
 function normalizeText(value: string | null) {
   return (value ?? "")
@@ -194,13 +200,41 @@ function paginate<T>(items: T[], page: number, pageSize: number) {
 }
 
 async function safeFindGoogleClinics(params: NearbyClinicSearchParams) {
+  const cacheKey = [
+    params.latitude,
+    params.longitude,
+    params.distanceKm,
+    params.language,
+  ].join(":");
+  const cached = googleClinicCache.get(cacheKey);
+  const now = Date.now();
+
+  if (cached && cached.expiresAt > now) {
+    return cached.clinics;
+  }
+
   try {
-    return await googleVeterinaryClinicRepository.findNearby({
+    const clinics = await googleVeterinaryClinicRepository.findNearby({
       latitude: params.latitude,
       longitude: params.longitude,
       radiusMeters: params.distanceKm * 1000,
       language: params.language,
     });
+
+    googleClinicCache.set(cacheKey, {
+      clinics,
+      expiresAt: now + GOOGLE_CACHE_TTL_MS,
+    });
+
+    if (googleClinicCache.size > 1000) {
+      for (const [key, value] of googleClinicCache) {
+        if (value.expiresAt <= now) {
+          googleClinicCache.delete(key);
+        }
+      }
+    }
+
+    return clinics;
   } catch (error) {
     console.error("Failed to fetch Google veterinary clinics", error);
     return [];

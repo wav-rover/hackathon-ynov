@@ -1,21 +1,43 @@
-# React + TypeScript + Vite + shadcn/ui
+# Front — Vet Locator
 
-This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
+React app with **shadcn/ui**, **Tailwind CSS 4**, and **Vite**.
 
-## Adding components
+## Stack
 
-To add components to your app, run the following command:
+- React 19 + TypeScript
+- Vite 8
+- Tailwind CSS 4
+- shadcn/ui (`base-mira` style)
+- Lucide React (icons)
+- Built-in dark mode (press `d` to toggle)
+
+## Commands
 
 ```bash
-npx shadcn@latest add button
+npm install      # install dependencies
+npm run dev      # start dev server
+npm run build    # production build
+npm run preview  # preview production build
+npm run lint     # ESLint
+npm run format   # Prettier
 ```
 
-This will place the ui components in the `src/components` directory.
+## Add a shadcn component
 
-## Using components
+```bash
+npx shadcn@latest add <component>
+```
 
-To use the components in your app, import them as follows:
+UI components live in `src/components/ui/`.
 
-```tsx
-import { Button } from "@/components/ui/button"
+## Structure
+
+```
+src/
+├── components/
+│   ├── ui/              # shadcn components
+│   └── theme-provider.tsx
+├── lib/utils.ts         # cn() utility
+├── App.tsx
+└── main.tsx
 ```

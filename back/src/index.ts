@@ -4,7 +4,7 @@ import { prisma } from "./db.js";
 import { errorHandler, notFound } from "./middlewares/error.middleware.js";
 import { router } from "./routes/index.js";
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT ?? 3000);
 
 const app = express();
 

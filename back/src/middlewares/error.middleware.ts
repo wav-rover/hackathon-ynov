@@ -17,7 +17,10 @@ export function errorHandler(
   _next: NextFunction,
 ) {
   if (error instanceof HttpError) {
-    response.status(error.statusCode).json({ message: error.message });
+    response.status(error.statusCode).json({
+      message: error.message,
+      ...(error.details === undefined ? {} : { details: error.details }),
+    });
     return;
   }
 

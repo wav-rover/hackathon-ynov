@@ -8,6 +8,25 @@ const PORT = Number(process.env.PORT ?? 3000);
 
 const app = express();
 
+app.use((request, response, next) => {
+  response.setHeader("Access-Control-Allow-Origin", "*");
+  response.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+  );
+  response.setHeader(
+    "Access-Control-Allow-Headers",
+    request.header("Access-Control-Request-Headers") ?? "Content-Type, Authorization",
+  );
+
+  if (request.method === "OPTIONS") {
+    response.sendStatus(204);
+    return;
+  }
+
+  next();
+});
+
 app.use(express.json());
 
 app.get("/", (_request, response) => {

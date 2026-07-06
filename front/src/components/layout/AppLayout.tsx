@@ -1,5 +1,7 @@
 import { VetMap } from "@/components/map/VetMap"
 import { ResultsList } from "@/components/results/ResultsList"
+import { FilterBar } from "@/components/filter/FilterBar"
+import { SearchBar } from "@/components/search/SearchBar"
 
 const menuItems = ["Accueil", "Recherche", "À propos"]
 
@@ -27,7 +29,9 @@ export function AppLayout() {
       </header>
 
       <main className="grid min-h-0 flex-1 grid-rows-[minmax(220px,38svh)_1fr] lg:grid-cols-[clamp(280px,32vw,400px)_1fr] lg:grid-rows-1">
-        <aside className="row-start-2 min-h-0 overflow-hidden border-t border-border lg:col-start-1 lg:row-start-1 lg:border-t-0 lg:border-r">
+        <aside className="row-start-2 flex min-h-0 flex-col overflow-hidden border-t border-border lg:col-start-1 lg:row-start-1 lg:border-t-0 lg:border-r">
+          <SearchBar />
+          <FilterBar />
           <ResultsList />
         </aside>
 

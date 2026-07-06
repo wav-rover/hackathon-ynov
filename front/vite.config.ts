@@ -11,4 +11,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      "/auth": "http://localhost:3000",
+      "/users": "http://localhost:3000",
+      "/pets": "http://localhost:3000",
+      "/veterinary-clinics": "http://localhost:3000",
+      "/clinics": "http://localhost:3000",
+    },
+  },
 })

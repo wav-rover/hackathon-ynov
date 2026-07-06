@@ -1,14 +1,22 @@
 import express from "express";
 
 import { prisma } from "./db.js";
+import { errorHandler, notFound } from "./middlewares/error.middleware.js";
+import { router } from "./routes/index.js";
 
 const PORT = 3000;
 
 const app = express();
 
+app.use(express.json());
+
 app.get("/", (_request, response) => {
-  response.send("hello");
+  response.json({ message: "API is running" });
 });
+
+app.use(router);
+app.use(notFound);
+app.use(errorHandler);
 
 async function start() {
   await prisma.$connect();

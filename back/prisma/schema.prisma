@@ -11,3 +11,22 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  pets     Pet[]
+
+  @@map("users")
+}
+
+model Pet {
+  id     Int    @id @default(autoincrement())
+  name   String
+  type   String
+  userId Int
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("pets")
+}

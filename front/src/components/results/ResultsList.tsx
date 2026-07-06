@@ -1,3 +1,4 @@
+import { FilterBar } from "@/components/filter/FilterBar"
 import { VetResultItem, type VetResult } from "@/components/results/VetResultItem"
 
 const sampleResults: VetResult[] = [
@@ -20,8 +21,11 @@ export function ResultsList() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="shrink-0 border-b border-border px-3 py-3 lg:px-4">
-        <h2 className="text-sm font-medium">Résultats</h2>
+      <div className="shrink-0 space-y-1 border-b border-border px-3 py-3 lg:px-4">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-medium">Résultats</h2>
+          <FilterBar />
+        </div>
         <p className="text-xs text-muted-foreground">
           {formatResultsCount(resultsCount)}
         </p>

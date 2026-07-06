@@ -10,6 +10,7 @@ import {
 import { cn } from "@/lib/utils"
 
 export type VetResult = {
+  id: string
   name: string
   address: string
   distance: string
@@ -20,10 +21,14 @@ export type VetResult = {
   phone?: string
   website?: string
   directionsUrl?: string
+  lat?: number
+  lng?: number
 }
 
 type VetResultItemProps = {
   vet: VetResult
+  isSelected?: boolean
+  onSelect?: (id: string) => void
 }
 
 function ActionButton({
@@ -61,6 +66,7 @@ function ActionButton({
       className={className}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
+      onClick={(event) => event.stopPropagation()}
     >
       <Icon className="size-3.5" aria-hidden />
       {label}
@@ -68,9 +74,23 @@ function ActionButton({
   )
 }
 
-export function VetResultItem({ vet }: VetResultItemProps) {
+export function VetResultItem({ vet, isSelected, onSelect }: VetResultItemProps) {
   return (
-    <article className="overflow-hidden rounded-lg border border-border bg-card">
+    <article
+      className={cn(
+        "overflow-hidden rounded-lg border bg-card transition-colors",
+        isSelected ? "border-primary ring-2 ring-primary/20" : "border-border"
+      )}
+      onClick={() => onSelect?.(vet.id)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault()
+          onSelect?.(vet.id)
+        }
+      }}
+      role={onSelect ? "button" : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+    >
       {vet.isEmergency ? (
         <div className="flex items-center gap-1.5 bg-primary px-3 py-1.5 text-[10px] font-semibold tracking-wide text-primary-foreground uppercase">
           <AlertTriangle className="size-3 shrink-0" aria-hidden />

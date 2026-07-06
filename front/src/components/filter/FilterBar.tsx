@@ -22,15 +22,15 @@ import {
 } from "@/components/ui/sheet"
 
 const sortOptions = [
-  { value: "relevance", label: "Pertinence" },
+  { value: "relevance", label: "Relevance" },
   { value: "distance", label: "Distance" },
-  { value: "name", label: "Nom (A-Z)" },
+  { value: "name", label: "Name (A-Z)" },
 ] as const
 
 type SortValue = (typeof sortOptions)[number]["value"]
 
 function getSortLabel(value: SortValue) {
-  return sortOptions.find((option) => option.value === value)?.label ?? "Trier"
+  return sortOptions.find((option) => option.value === value)?.label ?? "Sort"
 }
 
 export function FilterBar() {
@@ -49,7 +49,7 @@ export function FilterBar() {
           onClick={() => setIsFilterOpen(true)}
         >
           <SlidersHorizontal data-icon="inline-start" />
-          Filtres
+          Filters
         </Button>
 
         <DropdownMenu>
@@ -80,9 +80,9 @@ export function FilterBar() {
       <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
         <SheetContent side="left" className="w-full gap-0 p-0 sm:max-w-sm">
           <SheetHeader className="border-b border-border px-4 py-5">
-            <SheetTitle>Filtres</SheetTitle>
+            <SheetTitle>Filters</SheetTitle>
             <SheetDescription>
-              Affinez votre recherche de vétérinaires.
+              Refine your veterinarian search.
             </SheetDescription>
           </SheetHeader>
 
@@ -99,7 +99,7 @@ export function FilterBar() {
                   />
                 }
               >
-                Voir les résultats
+                View results
               </SheetClose>
               <Button
                 type="button"
@@ -108,7 +108,7 @@ export function FilterBar() {
                 className="w-full text-muted-foreground"
                 onClick={resetFilters}
               >
-                Réinitialiser
+                Reset
               </Button>
             </div>
           </SheetFooter>

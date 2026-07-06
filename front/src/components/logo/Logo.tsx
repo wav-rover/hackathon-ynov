@@ -14,7 +14,7 @@ export function Logo({ className }: LogoProps) {
         RC
       </span>
       <span className="flex flex-col leading-tight">
-        <span className="font-serif text-sm font-semibold tracking-wide text-foreground">
+        <span className="font-heading text-sm font-semibold tracking-wide text-foreground">
           ROYAL CANIN
         </span>
         <span className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground">

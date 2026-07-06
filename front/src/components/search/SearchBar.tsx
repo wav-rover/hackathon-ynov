@@ -6,7 +6,7 @@ export function SearchBar() {
   return (
     <div className="shrink-0 border-b border-border px-3 py-3 lg:px-4">
       <label htmlFor="vet-search" className="sr-only">
-        Rechercher un vétérinaire
+        Search for a veterinarian
       </label>
       <div className="relative">
         <Search
@@ -16,7 +16,7 @@ export function SearchBar() {
         <input
           id="vet-search"
           type="search"
-          placeholder="Rechercher un vétérinaire..."
+          placeholder="Search for a veterinarian..."
           className={cn(
             "h-9 w-full rounded-md border border-input bg-background pr-3 pl-9 text-sm outline-none",
             "placeholder:text-muted-foreground",

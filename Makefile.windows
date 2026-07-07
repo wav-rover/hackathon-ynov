@@ -1,0 +1,48 @@
+SHELL := cmd.exe
+.SHELLFLAGS := /C
+
+PID_DIR := .pids
+LOG_DIR := .logs
+BACK_PID := $(PID_DIR)\back.pid
+FRONT_PID := $(PID_DIR)\front.pid
+BACK_LOG := $(LOG_DIR)\back.log
+FRONT_LOG := $(LOG_DIR)\front.log
+
+.PHONY: start stop restart infra seed migrate back front logs status clean-pids
+
+start: infra seed migrate back front status
+
+stop:
+	@powershell -NoProfile -ExecutionPolicy Bypass -Command "foreach ($$pidFile in @('$(FRONT_PID)', '$(BACK_PID)')) { if (Test-Path $$pidFile) { $$pidValue = Get-Content $$pidFile -ErrorAction SilentlyContinue; if ($$pidValue) { Stop-Process -Id $$pidValue -Force -ErrorAction SilentlyContinue }; Remove-Item $$pidFile -Force -ErrorAction SilentlyContinue } }"
+	@docker compose down
+
+restart: stop start
+
+infra:
+	@docker compose up -d postgres directus
+
+seed:
+	@docker compose up --force-recreate directus-seed
+
+migrate:
+	@cd back && npm run prisma:migrate
+
+back:
+	@if not exist "$(PID_DIR)" mkdir "$(PID_DIR)"
+	@if not exist "$(LOG_DIR)" mkdir "$(LOG_DIR)"
+	@powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Test-Path '$(BACK_PID)') { $$pidValue = Get-Content '$(BACK_PID)' -ErrorAction SilentlyContinue; if ($$pidValue -and (Get-Process -Id $$pidValue -ErrorAction SilentlyContinue)) { Write-Host ('Backend already running with PID ' + $$pidValue); exit 0 } }; $$p = Start-Process npm.cmd -ArgumentList 'start' -WorkingDirectory 'back' -RedirectStandardOutput '$(BACK_LOG)' -RedirectStandardError '$(LOG_DIR)\back.err.log' -PassThru -WindowStyle Hidden; Set-Content '$(BACK_PID)' $$p.Id; Write-Host ('Backend started on http://localhost:3000, PID ' + $$p.Id)"
+
+front:
+	@if not exist "$(PID_DIR)" mkdir "$(PID_DIR)"
+	@if not exist "$(LOG_DIR)" mkdir "$(LOG_DIR)"
+	@powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Test-Path '$(FRONT_PID)') { $$pidValue = Get-Content '$(FRONT_PID)' -ErrorAction SilentlyContinue; if ($$pidValue -and (Get-Process -Id $$pidValue -ErrorAction SilentlyContinue)) { Write-Host ('Frontend already running with PID ' + $$pidValue); exit 0 } }; $$p = Start-Process npm.cmd -ArgumentList 'run dev -- --host 0.0.0.0' -WorkingDirectory 'front' -RedirectStandardOutput '$(FRONT_LOG)' -RedirectStandardError '$(LOG_DIR)\front.err.log' -PassThru -WindowStyle Hidden; Set-Content '$(FRONT_PID)' $$p.Id; Write-Host ('Frontend started on http://localhost:5173, PID ' + $$p.Id)"
+
+logs:
+	@powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-Content '$(BACK_LOG)','$(FRONT_LOG)' -Wait"
+
+status:
+	@docker compose ps
+	@powershell -NoProfile -ExecutionPolicy Bypass -Command "if (Test-Path '$(BACK_PID)') { $$pidValue = Get-Content '$(BACK_PID)' -ErrorAction SilentlyContinue; if ($$pidValue -and (Get-Process -Id $$pidValue -ErrorAction SilentlyContinue)) { Write-Host ('Backend: running, PID ' + $$pidValue + ', http://localhost:3000') } else { Write-Host 'Backend: stopped' } } else { Write-Host 'Backend: stopped' }; if (Test-Path '$(FRONT_PID)') { $$pidValue = Get-Content '$(FRONT_PID)' -ErrorAction SilentlyContinue; if ($$pidValue -and (Get-Process -Id $$pidValue -ErrorAction SilentlyContinue)) { Write-Host ('Frontend: running, PID ' + $$pidValue + ', http://localhost:5173') } else { Write-Host 'Frontend: stopped' } } else { Write-Host 'Frontend: stopped' }; Write-Host 'Directus: http://localhost:8055'"
+
+clean-pids:
+	@if exist "$(PID_DIR)" rmdir /S /Q "$(PID_DIR)"

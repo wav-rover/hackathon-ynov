@@ -11,6 +11,28 @@ Hackathon project monorepo: React frontend + backend API.
 
 ## Quick start
 
+**Make commands**
+
+Linux/macOS:
+
+```bash
+make -f Makefile.linux start
+make -f Makefile.linux stop
+
+make -f Makefile.linux status
+make -f Makefile.linux logs
+```
+
+Windows:
+
+```powershell
+make -f Makefile.windows start
+make -f Makefile.windows stop
+
+make -f Makefile.windows status
+make -f Makefile.windows logs
+```
+
 **Infrastructure**
 
 ```bash

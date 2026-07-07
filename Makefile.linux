@@ -1,0 +1,82 @@
+SHELL := /bin/bash
+
+PID_DIR := .pids
+LOG_DIR := .logs
+BACK_PID := $(PID_DIR)/back.pid
+FRONT_PID := $(PID_DIR)/front.pid
+BACK_LOG := $(LOG_DIR)/back.log
+FRONT_LOG := $(LOG_DIR)/front.log
+
+.PHONY: start stop restart infra seed migrate back front logs status clean-pids
+
+start: infra seed migrate back front status
+
+stop:
+	@echo "Stopping frontend/backend..."
+	@if [ -f "$(FRONT_PID)" ]; then \
+		kill -- -"$$(cat $(FRONT_PID))" 2>/dev/null || kill "$$(cat $(FRONT_PID))" 2>/dev/null || true; \
+		rm -f "$(FRONT_PID)"; \
+	fi
+	@if [ -f "$(BACK_PID)" ]; then \
+		kill -- -"$$(cat $(BACK_PID))" 2>/dev/null || kill "$$(cat $(BACK_PID))" 2>/dev/null || true; \
+		rm -f "$(BACK_PID)"; \
+	fi
+	@echo "Stopping Docker services..."
+	@docker compose down
+
+restart: stop start
+
+infra:
+	@echo "Starting Docker services..."
+	@docker compose up -d postgres directus
+
+seed:
+	@echo "Seeding Directus brand settings..."
+	@docker compose up --force-recreate directus-seed
+
+migrate:
+	@echo "Applying backend Prisma migrations..."
+	@cd back && npm run prisma:migrate
+
+back:
+	@mkdir -p "$(PID_DIR)" "$(LOG_DIR)"
+	@if [ -f "$(BACK_PID)" ] && kill -0 "$$(cat $(BACK_PID))" 2>/dev/null; then \
+		echo "Backend already running with PID $$(cat $(BACK_PID))"; \
+	else \
+		echo "Starting backend on http://localhost:3000"; \
+		setsid bash -c 'cd back && npm start > "../$(BACK_LOG)" 2>&1' & echo $$! > "$(BACK_PID)"; \
+	fi
+
+front:
+	@mkdir -p "$(PID_DIR)" "$(LOG_DIR)"
+	@if [ -f "$(FRONT_PID)" ] && kill -0 "$$(cat $(FRONT_PID))" 2>/dev/null; then \
+		echo "Frontend already running with PID $$(cat $(FRONT_PID))"; \
+	else \
+		echo "Starting frontend on http://localhost:5173"; \
+		setsid bash -c 'cd front && npm run dev -- --host 0.0.0.0 > "../$(FRONT_LOG)" 2>&1' & echo $$! > "$(FRONT_PID)"; \
+	fi
+
+logs:
+	@echo "Backend log:  $(BACK_LOG)"
+	@echo "Frontend log: $(FRONT_LOG)"
+	@tail -f "$(BACK_LOG)" "$(FRONT_LOG)"
+
+status:
+	@echo ""
+	@echo "Services:"
+	@docker compose ps
+	@echo ""
+	@if [ -f "$(BACK_PID)" ] && kill -0 "$$(cat $(BACK_PID))" 2>/dev/null; then \
+		echo "Backend:  running, PID $$(cat $(BACK_PID)), http://localhost:3000"; \
+	else \
+		echo "Backend:  stopped"; \
+	fi
+	@if [ -f "$(FRONT_PID)" ] && kill -0 "$$(cat $(FRONT_PID))" 2>/dev/null; then \
+		echo "Frontend: running, PID $$(cat $(FRONT_PID)), http://localhost:5173"; \
+	else \
+		echo "Frontend: stopped"; \
+	fi
+	@echo "Directus: http://localhost:8055"
+
+clean-pids:
+	@rm -rf "$(PID_DIR)"

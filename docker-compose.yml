@@ -48,8 +48,8 @@ services:
       DIRECTUS_ADMIN_EMAIL: "admin@example.com"
       DIRECTUS_ADMIN_PASSWORD: "admin"
     volumes:
-      - ./directus/seed-brand-styles.mjs:/seed-brand-styles.mjs:ro
-    command: ["node", "/seed-brand-styles.mjs"]
+      - ./directus:/directus-seed:ro
+    command: ["node", "/directus-seed/seed-brand-styles.mjs"]
 
 volumes:
   postgres_data:

@@ -4,23 +4,31 @@ import { toast } from "sonner"
 
 import { login } from "@/api/auth"
 import { ApiError } from "@/api/client"
+import { useBrand } from "@/components/brand/BrandProvider"
 import { AppHeader } from "@/components/layout/AppHeader"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { getAuthToken, setAuthSession } from "@/lib/auth-storage"
 
 export function SignInPage() {
   const navigate = useNavigate()
+  const { buildPath } = useBrand()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (getAuthToken()) {
-    return <Navigate to="/account" replace />
+    return <Navigate to={buildPath("/account")} replace />
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -44,7 +52,7 @@ export function SignInPage() {
 
       setAuthSession(response.token, response.user)
       toast.success(`Welcome back, ${response.user.username}!`)
-      navigate("/account")
+      navigate(buildPath("/account"))
     } catch (error) {
       if (error instanceof ApiError) {
         setErrorMessage(error.message)
@@ -65,7 +73,9 @@ export function SignInPage() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-lg">Sign in</CardTitle>
-            <CardDescription>Access your account to manage your pets and favorites.</CardDescription>
+            <CardDescription>
+              Access your account to manage your pets and favorites.
+            </CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -110,7 +120,12 @@ export function SignInPage() {
                 />
               </div>
 
-              <Button type="submit" size="lg" className="mt-2 w-full" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                size="lg"
+                className="mt-2 w-full"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <>
                     <Spinner />
@@ -124,7 +139,10 @@ export function SignInPage() {
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link to="/signup" className="font-medium text-foreground underline-offset-4 hover:underline">
+              <Link
+                to={buildPath("/signup")}
+                className="font-medium text-foreground underline-offset-4 hover:underline"
+              >
                 Sign up
               </Link>
             </p>

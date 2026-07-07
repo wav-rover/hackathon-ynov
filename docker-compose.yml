@@ -17,5 +17,41 @@ services:
       timeout: 5s
       retries: 10
 
+  directus:
+    image: directus/directus:10.13.1
+    container_name: hackathon-ynov-directus
+    restart: unless-stopped
+    ports:
+      - "8055:8055"
+    environment:
+      KEY: "hackathon-ynov-directus-key"
+      SECRET: "hackathon-ynov-directus-secret"
+      ADMIN_EMAIL: "admin@example.com"
+      ADMIN_PASSWORD: "admin"
+      DB_CLIENT: "sqlite3"
+      DB_FILENAME: "/directus/database/data.db"
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: "true"
+      PUBLIC_URL: "http://localhost:8055"
+    volumes:
+      - directus_database:/directus/database
+      - directus_uploads:/directus/uploads
+
+  directus-seed:
+    image: node:22-alpine
+    container_name: hackathon-ynov-directus-seed
+    depends_on:
+      - directus
+    restart: "no"
+    environment:
+      DIRECTUS_URL: "http://directus:8055"
+      DIRECTUS_ADMIN_EMAIL: "admin@example.com"
+      DIRECTUS_ADMIN_PASSWORD: "admin"
+    volumes:
+      - ./directus/seed-brand-styles.mjs:/seed-brand-styles.mjs:ro
+    command: ["node", "/seed-brand-styles.mjs"]
+
 volumes:
   postgres_data:
+  directus_database:
+  directus_uploads:

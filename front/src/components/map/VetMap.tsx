@@ -3,6 +3,7 @@ import { Map as MapIcon } from "lucide-react"
 import { useEffect } from "react"
 
 import type { VeterinaryClinic } from "@/api/clinics"
+import { useBrand } from "@/components/brand/BrandProvider"
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
 
@@ -29,31 +30,42 @@ function MapViewport({ center }: { center: MapCenter }) {
   useEffect(() => {
     if (!map) return
     map.panTo(center)
-  }, [map, center.lat, center.lng])
+  }, [map, center])
 
   return null
 }
 
-function getUserLocationIcon(): google.maps.Symbol | undefined {
+function getUserLocationIcon(
+  fillColor: string,
+  strokeColor: string
+): google.maps.Symbol | undefined {
   if (typeof google === "undefined") return undefined
 
   return {
     path: google.maps.SymbolPath.CIRCLE,
     scale: 9,
-    fillColor: "#2563eb",
+    fillColor,
     fillOpacity: 1,
-    strokeColor: "#ffffff",
+    strokeColor,
     strokeWeight: 3,
   }
 }
 
-function UserLocationMarker({ position }: { position: MapCenter }) {
+function UserLocationMarker({
+  position,
+  fillColor,
+  strokeColor,
+}: {
+  position: MapCenter
+  fillColor: string
+  strokeColor: string
+}) {
   return (
     <Marker
       position={position}
       title="Your location"
       zIndex={1000}
-      icon={getUserLocationIcon()}
+      icon={getUserLocationIcon(fillColor, strokeColor)}
     />
   )
 }
@@ -99,6 +111,8 @@ export function VetMap({
   selectedId,
   onSelectClinic,
 }: VetMapProps) {
+  const { brandStyle } = useBrand()
+
   if (!apiKey) {
     return (
       <MapPlaceholder message="Google Maps API key is missing (VITE_GOOGLE_MAPS_API_KEY)." />
@@ -106,7 +120,9 @@ export function VetMap({
   }
 
   const markers = clinics.filter(
-    (clinic): clinic is VeterinaryClinic & {
+    (
+      clinic
+    ): clinic is VeterinaryClinic & {
       location: { lat: number; lng: number }
     } => clinic.location !== null
   )
@@ -125,7 +141,11 @@ export function VetMap({
         fullscreenControl={false}
       >
         <MapViewport center={center} />
-        <UserLocationMarker position={center} />
+        <UserLocationMarker
+          position={center}
+          fillColor={brandStyle.map_user_marker_fill ?? "#2563eb"}
+          strokeColor={brandStyle.map_user_marker_stroke ?? "#ffffff"}
+        />
 
         {markers.map((clinic) => (
           <ClinicMarker

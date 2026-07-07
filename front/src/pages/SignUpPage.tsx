@@ -4,16 +4,24 @@ import { toast } from "sonner"
 
 import { register } from "@/api/auth"
 import { ApiError } from "@/api/client"
+import { useBrand } from "@/components/brand/BrandProvider"
 import { AppHeader } from "@/components/layout/AppHeader"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { setAuthSession } from "@/lib/auth-storage"
 
 export function SignUpPage() {
   const navigate = useNavigate()
+  const { buildPath } = useBrand()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -46,7 +54,7 @@ export function SignUpPage() {
 
       setAuthSession(response.token, response.user)
       toast.success(`Welcome, ${response.user.username}!`)
-      navigate("/")
+      navigate(buildPath("/"))
     } catch (error) {
       if (error instanceof ApiError) {
         setErrorMessage(error.message)
@@ -67,7 +75,9 @@ export function SignUpPage() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-lg">Create an account</CardTitle>
-            <CardDescription>Sign up to save your pets and favorite vets.</CardDescription>
+            <CardDescription>
+              Sign up to save your pets and favorite vets.
+            </CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -113,7 +123,10 @@ export function SignUpPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="confirm-password" className="text-sm font-medium">
+                <label
+                  htmlFor="confirm-password"
+                  className="text-sm font-medium"
+                >
                   Confirm password
                 </label>
                 <Input
@@ -129,7 +142,12 @@ export function SignUpPage() {
                 />
               </div>
 
-              <Button type="submit" size="lg" className="mt-2 w-full" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                size="lg"
+                className="mt-2 w-full"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <>
                     <Spinner />
@@ -143,7 +161,10 @@ export function SignUpPage() {
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               Already have an account?{" "}
-              <Link to="/signin" className="font-medium text-foreground underline-offset-4 hover:underline">
+              <Link
+                to={buildPath("/signin")}
+                className="font-medium text-foreground underline-offset-4 hover:underline"
+              >
                 Sign in
               </Link>
             </p>

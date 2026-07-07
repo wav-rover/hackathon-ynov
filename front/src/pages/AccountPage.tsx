@@ -4,13 +4,26 @@ import { LogOut } from "lucide-react"
 
 import { getCurrentUser, type User } from "@/api/auth"
 import { ApiError } from "@/api/client"
+import { useBrand } from "@/components/brand/BrandProvider"
 import { AppHeader } from "@/components/layout/AppHeader"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button, buttonVariants } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
-import { clearAuthSession, getAuthToken, getAuthUser, setAuthSession } from "@/lib/auth-storage"
+import {
+  clearAuthSession,
+  getAuthToken,
+  getAuthUser,
+  setAuthSession,
+} from "@/lib/auth-storage"
+import { cn } from "@/lib/utils"
 
 function getInitials(username: string) {
   return username.slice(0, 2).toUpperCase()
@@ -18,6 +31,7 @@ function getInitials(username: string) {
 
 export function AccountPage() {
   const navigate = useNavigate()
+  const { buildPath } = useBrand()
   const token = getAuthToken()
 
   const [user, setUser] = useState<User | null>(() => getAuthUser())
@@ -29,17 +43,18 @@ export function AccountPage() {
       return
     }
 
+    const authToken = token
     let isCancelled = false
 
     async function loadUser() {
       try {
-        const currentUser = await getCurrentUser(token)
+        const currentUser = await getCurrentUser(authToken)
         if (isCancelled) {
           return
         }
 
         setUser(currentUser)
-        setAuthSession(token, currentUser)
+        setAuthSession(authToken, currentUser)
       } catch (error) {
         if (isCancelled) {
           return
@@ -47,7 +62,7 @@ export function AccountPage() {
 
         if (error instanceof ApiError && error.status === 401) {
           clearAuthSession()
-          navigate("/signup", { replace: true })
+          navigate(buildPath("/signup"), { replace: true })
           return
         }
 
@@ -64,15 +79,15 @@ export function AccountPage() {
     return () => {
       isCancelled = true
     }
-  }, [navigate, token])
+  }, [buildPath, navigate, token])
 
   if (!token) {
-    return <Navigate to="/signup" replace />
+    return <Navigate to={buildPath("/signup")} replace />
   }
 
   function handleLogout() {
     clearAuthSession()
-    navigate("/")
+    navigate(buildPath("/"))
   }
 
   const pets = user?.pets ?? []
@@ -103,12 +118,18 @@ export function AccountPage() {
               <>
                 <div className="flex items-center gap-4">
                   <Avatar size="lg">
-                    <AvatarFallback>{getInitials(user.username)}</AvatarFallback>
+                    <AvatarFallback>
+                      {getInitials(user.username)}
+                    </AvatarFallback>
                   </Avatar>
 
                   <div className="min-w-0">
-                    <p className="truncate text-base font-medium">{user.username}</p>
-                    <p className="text-sm text-muted-foreground">User #{user.id}</p>
+                    <p className="truncate text-base font-medium">
+                      {user.username}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      User #{user.id}
+                    </p>
                   </div>
                 </div>
 
@@ -122,24 +143,39 @@ export function AccountPage() {
                           className="flex items-center justify-between rounded-md bg-muted/50 px-3 py-2 text-sm"
                         >
                           <span className="font-medium">{pet.name}</span>
-                          <span className="text-muted-foreground capitalize">{pet.type}</span>
+                          <span className="text-muted-foreground capitalize">
+                            {pet.type}
+                          </span>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="mt-2 text-sm text-muted-foreground">No pets added yet.</p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      No pets added yet.
+                    </p>
                   )}
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Button type="button" variant="outline" className="w-full" onClick={handleLogout}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleLogout}
+                  >
                     <LogOut className="size-4" />
                     Log out
                   </Button>
 
-                  <Button type="button" variant="ghost" className="w-full" asChild>
-                    <Link to="/">Back to home</Link>
-                  </Button>
+                  <Link
+                    to={buildPath("/")}
+                    className={cn(
+                      buttonVariants({ variant: "ghost" }),
+                      "w-full"
+                    )}
+                  >
+                    Back to home
+                  </Link>
                 </div>
               </>
             ) : null}

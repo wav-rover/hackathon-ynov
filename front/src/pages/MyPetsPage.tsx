@@ -5,16 +5,25 @@ import { toast } from "sonner"
 
 import { createPet, deletePet, listPets, type Pet } from "@/api/pets"
 import { ApiError } from "@/api/client"
+import { useBrand } from "@/components/brand/BrandProvider"
 import { AppHeader } from "@/components/layout/AppHeader"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button, buttonVariants } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { clearAuthSession, getAuthToken } from "@/lib/auth-storage"
+import { cn } from "@/lib/utils"
 
 export function MyPetsPage() {
   const navigate = useNavigate()
+  const { buildPath } = useBrand()
   const token = getAuthToken()
 
   const [pets, setPets] = useState<Pet[]>([])
@@ -30,11 +39,12 @@ export function MyPetsPage() {
       return
     }
 
+    const authToken = token
     let isCancelled = false
 
     async function loadPets() {
       try {
-        const data = await listPets(token)
+        const data = await listPets(authToken)
         if (!isCancelled) {
           setPets(data)
         }
@@ -45,7 +55,7 @@ export function MyPetsPage() {
 
         if (error instanceof ApiError && error.status === 401) {
           clearAuthSession()
-          navigate("/signin", { replace: true })
+          navigate(buildPath("/signin"), { replace: true })
           return
         }
 
@@ -62,11 +72,13 @@ export function MyPetsPage() {
     return () => {
       isCancelled = true
     }
-  }, [navigate, token])
+  }, [buildPath, navigate, token])
 
   if (!token) {
-    return <Navigate to="/signin" replace />
+    return <Navigate to={buildPath("/signin")} replace />
   }
+
+  const authToken = token
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -83,7 +95,7 @@ export function MyPetsPage() {
     setIsSubmitting(true)
 
     try {
-      const pet = await createPet(token, {
+      const pet = await createPet(authToken, {
         name: trimmedName,
         type: trimmedType,
       })
@@ -109,7 +121,7 @@ export function MyPetsPage() {
     setDeletingPetId(petId)
 
     try {
-      await deletePet(token, petId)
+      await deletePet(authToken, petId)
       setPets((currentPets) => currentPets.filter((pet) => pet.id !== petId))
       toast.success("Pet removed.")
     } catch (error) {
@@ -161,7 +173,9 @@ export function MyPetsPage() {
                           </div>
                           <div>
                             <p className="text-sm font-medium">{pet.name}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{pet.type}</p>
+                            <p className="text-xs text-muted-foreground capitalize">
+                              {pet.type}
+                            </p>
                           </div>
                         </div>
 
@@ -173,7 +187,11 @@ export function MyPetsPage() {
                           disabled={deletingPetId === pet.id}
                           onClick={() => void handleDelete(pet.id)}
                         >
-                          {deletingPetId === pet.id ? <Spinner /> : <Trash2 className="size-4" />}
+                          {deletingPetId === pet.id ? (
+                            <Spinner />
+                          ) : (
+                            <Trash2 className="size-4" />
+                          )}
                         </Button>
                       </li>
                     ))}
@@ -182,11 +200,16 @@ export function MyPetsPage() {
                   <div className="rounded-lg border border-dashed border-border px-4 py-8 text-center">
                     <PawPrint className="mx-auto size-8 text-muted-foreground" />
                     <p className="mt-3 text-sm font-medium">No pets yet</p>
-                    <p className="mt-1 text-sm text-muted-foreground">Add your first pet below.</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Add your first pet below.
+                    </p>
                   </div>
                 )}
 
-                <form className="flex flex-col gap-4 border-t border-border pt-6" onSubmit={handleSubmit}>
+                <form
+                  className="flex flex-col gap-4 border-t border-border pt-6"
+                  onSubmit={handleSubmit}
+                >
                   <p className="text-sm font-medium">Add a pet</p>
 
                   <div className="flex flex-col gap-1.5">
@@ -221,7 +244,12 @@ export function MyPetsPage() {
                     />
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full"
+                    disabled={isSubmitting}
+                  >
                     {isSubmitting ? (
                       <>
                         <Spinner />
@@ -233,9 +261,12 @@ export function MyPetsPage() {
                   </Button>
                 </form>
 
-                <Button type="button" variant="ghost" className="w-full" asChild>
-                  <Link to="/account">Back to account</Link>
-                </Button>
+                <Link
+                  to={buildPath("/account")}
+                  className={cn(buttonVariants({ variant: "ghost" }), "w-full")}
+                >
+                  Back to account
+                </Link>
               </>
             )}
           </CardContent>

@@ -7,7 +7,11 @@ import {
   Phone,
 } from "lucide-react"
 
+import { Badge } from "@/components/ui/badge"
+import { SPECIALTIES, formatServiceLabel } from "@/lib/filters"
 import { cn } from "@/lib/utils"
+
+const SPECIALTY_VALUES = new Set(SPECIALTIES.map((specialty) => specialty.value))
 
 export type VetResult = {
   id: string
@@ -23,6 +27,7 @@ export type VetResult = {
   directionsUrl?: string
   lat?: number
   lng?: number
+  services?: string[]
 }
 
 type VetResultItemProps = {
@@ -75,6 +80,10 @@ function ActionButton({
 }
 
 export function VetResultItem({ vet, isSelected, onSelect }: VetResultItemProps) {
+  const specialties = vet.services?.filter((service) =>
+    SPECIALTY_VALUES.has(service)
+  ) ?? []
+
   return (
     <article
       className={cn(
@@ -141,6 +150,16 @@ export function VetResultItem({ vet, isSelected, onSelect }: VetResultItemProps)
             <span className="font-medium text-primary">Open Sunday</span>
           ) : null}
         </div>
+
+        {specialties.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5 pt-0.5">
+            {specialties.map((service) => (
+              <Badge key={service} variant="secondary">
+                {formatServiceLabel(service)}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-3 gap-2 border-t border-border px-3 py-2.5">

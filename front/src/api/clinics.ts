@@ -13,6 +13,7 @@ export type NearbyClinicsParams = {
   openNow?: boolean
   open24_7?: boolean
   emergency?: boolean
+  services?: string[]
   sort?: "nearest" | "rating"
   page?: number
   pageSize?: number
@@ -26,6 +27,9 @@ export function fetchNearbyClinics(params: NearbyClinicsParams) {
     ...(params.openNow !== undefined ? { openNow: String(params.openNow) } : {}),
     ...(params.open24_7 !== undefined ? { open24_7: String(params.open24_7) } : {}),
     ...(params.emergency !== undefined ? { emergency: String(params.emergency) } : {}),
+    ...(params.services !== undefined && params.services.length > 0
+      ? { services: params.services.join(",") }
+      : {}),
     ...(params.sort !== undefined ? { sort: params.sort } : {}),
     ...(params.page !== undefined ? { page: String(params.page) } : {}),
     ...(params.pageSize !== undefined ? { pageSize: String(params.pageSize) } : {}),
@@ -62,5 +66,6 @@ export function clinicToVetResult(clinic: VeterinaryClinic): VetResult {
     directionsUrl: clinic.googleMapsUrl ?? undefined,
     lat: clinic.location?.lat,
     lng: clinic.location?.lng,
+    services: clinic.services ?? [],
   }
 }

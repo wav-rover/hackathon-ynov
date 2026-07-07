@@ -1,8 +1,12 @@
+import { LocateFixed } from "lucide-react"
+
 import { clinicToVetResult } from "@/api/clinics"
 import type { VeterinaryClinic } from "@/api/clinics"
 import { FilterBar } from "@/components/filter/FilterBar"
 import { VetResultItem } from "@/components/results/VetResultItem"
+import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import type { ClinicFilters } from "@/lib/filters"
 
 type ResultsListProps = {
   clinics: VeterinaryClinic[]
@@ -11,6 +15,11 @@ type ResultsListProps = {
   error: string | null
   selectedId?: string | null
   onSelectClinic?: (id: string) => void
+  filters: ClinicFilters
+  onFiltersChange: (filters: ClinicFilters) => void
+  onResetFilters: () => void
+  onLocate: () => void
+  isLocating: boolean
 }
 
 function formatResultsCount(count: number) {
@@ -26,19 +35,44 @@ export function ResultsList({
   error,
   selectedId,
   onSelectClinic,
+  filters,
+  onFiltersChange,
+  onResetFilters,
+  onLocate,
+  isLocating,
 }: ResultsListProps) {
   const results = clinics.map(clinicToVetResult)
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="shrink-0 space-y-1 border-b border-border px-3 py-3 lg:px-4">
+      <div className="shrink-0 space-y-2 border-b border-border px-3 py-3 lg:px-4">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-medium">Results</h2>
-          <FilterBar />
+          <FilterBar
+            filters={filters}
+            onChange={onFiltersChange}
+            onReset={onResetFilters}
+          />
         </div>
-        <p className="text-xs text-muted-foreground">
-          {formatResultsCount(total)}
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            {formatResultsCount(total)}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onLocate}
+            disabled={isLocating}
+          >
+            {isLocating ? (
+              <Spinner data-icon="inline-start" className="size-4" />
+            ) : (
+              <LocateFixed data-icon="inline-start" />
+            )}
+            Use my location
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

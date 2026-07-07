@@ -122,7 +122,7 @@ function dedupeClinics(clinics: VeterinaryClinic[]) {
   }, []);
 }
 
-function hasAllServices(clinic: VeterinaryClinic, services: string[]) {
+function hasAnyService(clinic: VeterinaryClinic, services: string[]) {
   if (services.length === 0) {
     return true;
   }
@@ -131,7 +131,7 @@ function hasAllServices(clinic: VeterinaryClinic, services: string[]) {
 
   return services
     .map((service) => normalizeText(service))
-    .every((service) => clinicServices.includes(service));
+    .some((service) => clinicServices.includes(service));
 }
 
 function applyFilters(
@@ -158,7 +158,7 @@ function applyFilters(
       return false;
     }
 
-    return hasAllServices(clinic, params.services);
+    return hasAnyService(clinic, params.services);
   });
 }
 
